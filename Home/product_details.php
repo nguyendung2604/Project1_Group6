@@ -185,7 +185,7 @@ try {
     <!-- Header giống index.php -->
     <nav class="navbar navbar-expand-lg navbar-light bg-white fixed-top shadow-sm">
         <div class="container">
-            <a class="navbar-brand brand-font text-primary me-4" href="#">Wireless World</a>
+            <a class="navbar-brand brand-font text-primary me-4" href="index.php">Wireless World</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>

@@ -13,7 +13,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Thêm danh mục
         if (isset($_POST['add_category'])) {
             $category_name = trim($_POST['category_name']);
-            if (!empty($category_name)) {
+            if (empty($category_name) || strlen($category_name) < 3) {
+                $message = "Tên danh mục phải có ít nhất 3 ký tự!";
+                $message_type = "warning";
+            } elseif (preg_match('/[^a-zA-Z0-9\s]/', $category_name)) {
+                $message = "Tên danh mục chỉ được chứa chữ, số và khoảng trắng!";
+                $message_type = "warning";
+            } else {
                 $sql = "INSERT INTO categories (name) VALUES (:name)";
                 $stmt = $conn->prepare($sql);
                 $stmt->bindParam(':name', $category_name, PDO::PARAM_STR);
@@ -35,7 +41,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Thêm thương hiệu
         if (isset($_POST['add_brand'])) {
             $brand_name = trim($_POST['brand_name']);
-            if (!empty($brand_name)) {
+            if (empty($brand_name) || strlen($brand_name) < 2) {
+                $message = "Tên thương hiệu phải có ít nhất 2 ký tự!";
+                $message_type = "warning";
+            } elseif (preg_match('/[^a-zA-Z0-9\s]/', $brand_name)) {
+                $message = "Tên thương hiệu chỉ được chứa chữ, số và khoảng trắng!";
+                $message_type = "warning";
+            } else {
                 $sql = "INSERT INTO brands (name) VALUES (:name)";
                 $stmt = $conn->prepare($sql);
                 $stmt->bindParam(':name', $brand_name, PDO::PARAM_STR);
@@ -59,9 +71,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $brand_id = $_POST['brand_id'];
             $quantity = $_POST['quantity'];
             $image_url = trim($_POST['image_url']);
-
-            if (!empty($name) && $price > 0 && $quantity >= 0 && !empty($category_id) && !empty($brand_id)) {
-                $sql = "INSERT INTO products (name, description, price, category_id, brand_id, quantity) VALUES (:name, :description, :price, :category_id, :brand_id, :quantity)";
+            $screen_size = trim($_POST['screen_size'] ?? '');
+            $ram = trim($_POST['ram'] ?? '');
+            $storage = trim($_POST['storage'] ?? '');
+            $camera = trim($_POST['camera'] ?? '');
+            $battery = trim($_POST['battery'] ?? '');
+            $os = trim($_POST['os'] ?? '');
+            $cpu = trim($_POST['cpu'] ?? '');
+            if (empty($name) || strlen($name) < 3) {
+                $message = "Tên sản phẩm phải có ít nhất 3 ký tự!";
+                $message_type = "warning";
+            } elseif ($price <= 0) {
+                $message = "Giá sản phẩm phải lớn hơn 0!";
+                $message_type = "warning";
+            } elseif ($quantity < 0) {
+                $message = "Số lượng không hợp lệ!";
+                $message_type = "warning";
+            } elseif (empty($category_id) || empty($brand_id)) {
+                $message = "Vui lòng chọn danh mục và thương hiệu!";
+                $message_type = "warning";
+            } else {
+                $sql = "INSERT INTO products (name, description, price, category_id, brand_id, quantity, screen_size, ram, storage, camera, battery, os, cpu) VALUES (:name, :description, :price, :category_id, :brand_id, :quantity, :screen_size, :ram, :storage, :camera, :battery, :os, :cpu)";
                 $stmt = $conn->prepare($sql);
                 $stmt->bindParam(':name', $name, PDO::PARAM_STR);
                 $stmt->bindParam(':description', $description, PDO::PARAM_STR);
@@ -69,7 +99,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->bindParam(':category_id', $category_id, PDO::PARAM_INT);
                 $stmt->bindParam(':brand_id', $brand_id, PDO::PARAM_INT);
                 $stmt->bindParam(':quantity', $quantity, PDO::PARAM_INT);
-                
+                $stmt->bindParam(':screen_size', $screen_size, PDO::PARAM_STR);
+                $stmt->bindParam(':ram', $ram, PDO::PARAM_STR);
+                $stmt->bindParam(':storage', $storage, PDO::PARAM_STR);
+                $stmt->bindParam(':camera', $camera, PDO::PARAM_STR);
+                $stmt->bindParam(':battery', $battery, PDO::PARAM_STR);
+                $stmt->bindParam(':os', $os, PDO::PARAM_STR);
+                $stmt->bindParam(':cpu', $cpu, PDO::PARAM_STR);
                 if ($stmt->execute()) {
                     $product_id = $conn->lastInsertId();
                     
@@ -90,9 +126,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $message_type = "danger";
                 }
                 $stmt = null; // Đóng statement
-            } else {
-                $message = "Vui lòng điền đầy đủ thông tin hợp lệ!";
-                $message_type = "warning";
             }
         }
         

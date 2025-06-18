@@ -61,6 +61,36 @@
             <label class="form-label">Description</label>
             <textarea name="description" class="form-control" rows="3" placeholder="Enter product description..."></textarea>
         </div>
+
+        <div class="col-md-6">
+            <label class="form-label">Screen Size</label>
+            <input type="text" name="screen_size" class="form-control" placeholder="e.g. 6.5 inch">
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">RAM</label>
+            <input type="text" name="ram" class="form-control" placeholder="e.g. 8GB">
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Storage</label>
+            <input type="text" name="storage" class="form-control" placeholder="e.g. 128GB">
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Camera</label>
+            <input type="text" name="camera" class="form-control" placeholder="e.g. 48MP + 12MP">
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Battery</label>
+            <input type="text" name="battery" class="form-control" placeholder="e.g. 5000 mAh">
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">OS</label>
+            <input type="text" name="os" class="form-control" placeholder="e.g. Android 14">
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">CPU</label>
+            <input type="text" name="cpu" class="form-control" placeholder="e.g. Snapdragon 8 Gen 3">
+        </div>
+
         <div class="col-12">
             <button type="submit" name="add_product" class="btn btn-success-custom btn-custom">
                 <i class="fas fa-plus me-2"></i>Add product

@@ -7,6 +7,7 @@
                 <th>UserName</th>
                 <th>Total</th>
                 <th>Status</th>
+                <th>Address</th>
                 <th>Action</th>
             </tr>
         </thead>
@@ -39,6 +40,7 @@
                         ?>
                     
                 </td>
+                <td><?php echo htmlspecialchars($row['shipping_address']); ?></td>
                 <td>
                     <form method="POST" class="d-inline">
                         <input type="hidden" name="order_id" value="<?php echo $row['order_id']; ?>">

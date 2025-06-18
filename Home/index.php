@@ -340,7 +340,7 @@ if ($search !== '') {
     <!-- Thêm nút truy cập trang so sánh -->
     <div class="text-end my-3">
         <a href="compare.php" class="btn btn-warning">
-            <i class="bi bi-arrow-left-right"></i> So sánh sản phẩm (<?php echo isset($_SESSION['compare']) ? count($_SESSION['compare']) : 0; ?>)
+            <i class="bi bi-arrow-left-right"></i> Compare products (<?php echo isset($_SESSION['compare']) ? count($_SESSION['compare']) : 0; ?>)
         </a>
     </div>
 </section>

@@ -1,61 +1,75 @@
 <?php
 require_once "db_connect.php";
 
+// Validate input function
+function validate_login($username, $password) {
+    $errors = [];
+    if (empty($username) || strlen($username) < 3) {
+        $errors[] = "Username must be at least 3 characters.";
+    }
+    if (empty($password) || strlen($password) < 6) {
+        $errors[] = "Password must be at least 3 characters.";
+    }
+    return $errors;
+}
+
 // Xử lý dữ liệu từ form đăng nhập
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = $_POST['username'];
+    $username = trim($_POST['username']);
     $password = $_POST['password'];
+    $errors = validate_login($username, $password);
 
-    try {
-        $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ? AND password = ?");
-        $stmt->execute([$username, $password]);
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    if (empty($errors)) {
+        try {
+            $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ?");
+            $stmt->execute([$username]);
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if ($user) {
-            // Khởi tạo session
-            session_start();
-            $_SESSION['username'] = $user['username'];
-            $_SESSION['role'] = $user['role'];
-            $_SESSION['user_id'] = $user['user_id']; // Giả sử bạn lưu trữ ID người dùng trong session
+            if ($user && password_verify($password, $user['password'])) {
+                // Khởi tạo session
+                session_start();
+                $_SESSION['username'] = $user['username'];
+                $_SESSION['role'] = $user['role'];
+                $_SESSION['user_id'] = $user['user_id'];
+                $_SESSION['cart'] = [];
 
-            $_SESSION['cart'] = []; // Clear any previous cart
-
-            // Lấy hoặc tạo giỏ hàng
-            function getOrCreateCartId($pdo, $user_id) {
-                $stmt = $pdo->prepare("SELECT cart_id FROM carts WHERE user_id = ?");
-                $stmt->execute([$user_id]);
-                $cart_id = $stmt->fetchColumn();
-                if (!$cart_id) {
-                    $pdo->prepare("INSERT INTO carts (user_id, total_price) VALUES (?, 0)")->execute([$user_id]);
-                    $cart_id = $pdo->lastInsertId();
+                // Lấy hoặc tạo giỏ hàng
+                function getOrCreateCartId($pdo, $user_id) {
+                    $stmt = $pdo->prepare("SELECT cart_id FROM carts WHERE user_id = ?");
+                    $stmt->execute([$user_id]);
+                    $cart_id = $stmt->fetchColumn();
+                    if (!$cart_id) {
+                        $pdo->prepare("INSERT INTO carts (user_id, total_price) VALUES (?, 0)")->execute([$user_id]);
+                        $cart_id = $pdo->lastInsertId();
+                    }
+                    return $cart_id;
                 }
-                return $cart_id;
-            }
 
-            $user_id = $_SESSION['user_id'];
-            $cart_id = getOrCreateCartId($pdo, $user_id);
-            $stmt = $pdo->prepare("SELECT product_id, quantity FROM cart_items WHERE cart_id = ?");
-            $stmt->execute([$cart_id]);
-            $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                $user_id = $_SESSION['user_id'];
+                $cart_id = getOrCreateCartId($pdo, $user_id);
+                $stmt = $pdo->prepare("SELECT product_id, quantity FROM cart_items WHERE cart_id = ?");
+                $stmt->execute([$cart_id]);
+                $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            if ($items) {
-                foreach ($items as $item) {
-                    $_SESSION['cart'][$item['product_id']] = $item['quantity'];
+                if ($items) {
+                    foreach ($items as $item) {
+                        $_SESSION['cart'][$item['product_id']] = $item['quantity'];
+                    }
                 }
-            }
 
-            if ($user['role'] === 'admin') {
-                header("Location: ../admin/index.php"); // Chuyển hướng đến trang admin
-                exit;
+                if ($user['role'] === 'admin') {
+                    header("Location: ../admin/index.php");
+                    exit;
+                } else {
+                    header("Location: index.php");
+                    exit;
+                }
             } else {
-                header("Location: index.php"); // Chuyển hướng đến trang người dùng
-                exit;
+                $errors[] = "Incorrect login information!";
             }
-        } else {
-            echo "<div class='alert alert-danger text-center'>Incorrect login information!</div>";
+        } catch (PDOException $e) {
+            $errors[] = "Error: " . $e->getMessage();
         }
-    } catch (PDOException $e) {
-        echo "<div class='alert alert-danger text-center'>Error: " . $e->getMessage() . "</div>";
     }
 }
 ?>
@@ -105,6 +119,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <a href="register.php" class="text-decoration-none">Register</a>
                             </div>
                         </form>
+
+                        <?php if (!empty($errors)): ?>
+                            <div class='alert alert-danger text-center'>
+                                <?php foreach ($errors as $err) echo htmlspecialchars($err) . '<br>'; ?>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>

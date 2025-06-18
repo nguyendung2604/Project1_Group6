@@ -1,27 +1,51 @@
 <?php
 require_once "db_connect.php";
 
+function validate_register($username, $password, $confirm_password, $email) {
+    $errors = [];
+    if (empty($username) || strlen($username) < 3) {
+        $errors[] = "Username must be at least 3 characters.";
+    }
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $errors[] = "Invalid email address.";
+    }
+    if (empty($password) || strlen($password) < 6) {
+        $errors[] = "Password must be at least 6 characters.";
+    }
+    if ($password !== $confirm_password) {
+        $errors[] = "Passwords do not match!";
+    }
+    return $errors;
+}
+
 // Xử lý dữ liệu từ form đăng ký
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = $_POST['username'];
+    $username = trim($_POST['username']);
     $password = $_POST['password'];
     $confirm_password = $_POST['confirm_password'];
-    $email = $_POST['email'];
+    $email = trim($_POST['email']);
 
-    if ($password !== $confirm_password) {
-        echo "<div class='alert alert-danger text-center'>Passwords do not match!</div>";
-    } else {
+    $errors = validate_register($username, $password, $confirm_password, $email);
+
+    if (empty($errors)) {
         try {
-            $stmt = $pdo->prepare("INSERT INTO users(username, password, email) VALUES(?, ?, ?)");
-            $result = $stmt->execute([$username, $password, $email]);
-
-            if ($result) {
-                echo "<div class='alert alert-success text-center'>Registration successful!</div>";
+            // Check if username or email already exists
+            $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE username = ? OR email = ?");
+            $stmt->execute([$username, $email]);
+            if ($stmt->fetchColumn() > 0) {
+                $errors[] = "Username or email already exists.";
             } else {
-                echo "<div class='alert alert-danger text-center'>Registration failed!</div>";
+                $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+                $stmt = $pdo->prepare("INSERT INTO users(username, password, email) VALUES(?, ?, ?)");
+                $result = $stmt->execute([$username, $hashed_password, $email]);
+                if ($result) {
+                    echo "<div class='alert alert-success text-center'>Registration successful!</div>";
+                } else {
+                    $errors[] = "Registration failed!";
+                }
             }
         } catch (PDOException $e) {
-            echo "<div class='alert alert-danger text-center'>Error: " . $e->getMessage() . "</div>";
+            $errors[] = "Error: " . $e->getMessage();
         }
     }
 }
@@ -72,6 +96,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <a href="login.php" class="text-decoration-none">Login</a>
                             </div>
                         </form>
+
+                        <?php if (!empty($errors)): ?>
+                            <div class='alert alert-danger text-center'>
+                                <?php foreach ($errors as $err) echo htmlspecialchars($err) . '<br>'; ?>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
