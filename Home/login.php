@@ -8,7 +8,7 @@ function validate_login($username, $password) {
         $errors[] = "Username must be at least 3 characters.";
     }
     if (empty($password) || strlen($password) < 6) {
-        $errors[] = "Password must be at least 3 characters.";
+        $errors[] = "Password must be at least 6 characters.";
     }
     return $errors;
 }

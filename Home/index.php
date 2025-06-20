@@ -252,6 +252,7 @@ if ($search !== '') {
                     <li class="nav-item">
                         <a class="nav-link fw-medium" href="#contact">Contact</a>
                     </li>
+                    
                 </ul>
             </div>
         </div>

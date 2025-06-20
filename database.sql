@@ -113,7 +113,7 @@ CREATE TABLE order_items (
 
 -- 1. INSERT USERS
 INSERT INTO users (username, password, email, role) VALUES
-('admin', '123', 'admin@gmail.com', 'admin'),
+('admin', '123456', 'admin@gmail.com', 'admin'),
 
 
 -- 2. INSERT CATEGORIES
